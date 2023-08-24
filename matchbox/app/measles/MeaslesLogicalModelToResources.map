@@ -4,25 +4,31 @@ uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias MeaslesCIFBundle as 
 
 group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bundle : MeaslesCIFBundle) {
   lm -> bundle.type = 'document' "set bundle type";
-  lm -> uuid() as id, bundle.id = id "set id";
-  lm -> uuid() as cid then { 
-    lm -> bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', cid),  entry.request as request,  request.method = 'PUT',  request.url = append('Composition/', cid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition then {
-      lm then LmToComposition(lm, composition) "setup composition";
-      lm -> entry.resource = composition "set composition resource";
-      } "create composition resource";
-} "do it" ;
+  lm -> uuid() as bid, bundle.id = bid "set id";
+  lm -> uuid() as cid, uuid() as pid then { 
+    lm -> bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', cid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition then {
+      lm then LmToComposition(lm, composition, cid, pid) "create composition";
+      lm -> entry.resource = composition "set composition as entry";
+      } "map composition resource";
+    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', pid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesPatient') as patient then {
+    lm.Demographics as demographics -> demographics then DemographicsToPatient(demographics, patient, pid) "create patient";
+    lm -> entry.resource = patient "set patient as entry";
+    } "map patient resource";
+} "set entries" ;
 }
 
-group LmToComposition(source lm : MeaslesLogicalModel, target composition : MeaslesCIFComposition) {
- // cid -> composition.id = cid "set id";
-  lm.Demographics as demographics -> uuid() as pid, create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesPatient') as patient then { demographics then DemographicsToPatient(demographics, patient, pid) "set patient";
-  lm -> composition.subject= patient "set subject";
-  } "do this";
+
+group LmToComposition(source lm : MeaslesLogicalModel, target composition : MeaslesCIFComposition, source cid, source pid) {
+  cid -> composition.id = cid "set id";
+  lm -> composition.subject as subject then {
+    lm -> subject.reference= append('Patient/',pid) "set subject";
+  } "do";
 }
+
 
 group DemographicsToPatient(source demographics:DemographicsLogicalModel , target patient: MeaslesPatient, source pid) {
  pid -> patient.id = pid "set id";
- demographics.name as name -> patient.name = name "set name";
+ demographics.Name as name -> patient.name = name "set name";
  demographics.DateOfBirth as dob -> patient.birthDate = dob "set date of birth";
  demographics.Sex as sex -> patient.gender = sex "set sex";
  demographics.CountryOfBirth as cob -> patient.CountryOfBirth = cob "set CountryOfBirth";
