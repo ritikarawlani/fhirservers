@@ -39,7 +39,7 @@
       "DateReportedLocal": "2023-08-09",
       "DateReportedNational": "2023-08-08",
       "InitialDiagnosis": {
-        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/InitDiag",
+        "system": "http://worldhealthorganization.github.io/smart-ot/InitDiag",
         "code": "1",
         "display": "Measles"
       }

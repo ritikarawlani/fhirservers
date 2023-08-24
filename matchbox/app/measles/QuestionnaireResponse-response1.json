@@ -28,7 +28,7 @@
                 "answer": [
                   {
                     "valueCoding": {
-                      "system": "http://ritikarawlani.github.io/smart-outbreak-measles/InitDiag",
+                      "system": "http://worldhealthorganization.github.io/smart-ot/InitDiag",
                       "code": "1",
                       "display": "Measles"
                     }
