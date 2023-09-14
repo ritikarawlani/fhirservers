@@ -4,25 +4,66 @@ uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias MeaslesCIFBundle as 
 
 group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bundle : MeaslesCIFBundle) {
   lm -> bundle.type = 'document' "set bundle type";
+  lm.ReportingSource as reportingSource -> reportingSource then {
+    reportingSource.DateReportedNational as date -> bundle.timestamp = date "set date";
+  } "set timestamp";
   lm -> uuid() as bid, bundle.id = bid "set id";
-  lm -> uuid() as cid, uuid() as pid then { 
+  lm -> uuid() as cid, uuid() as pid, uuid() as prid, uuid() as oid, uuid() as eid, uuid() as obsid  then { 
     lm -> bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', cid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition then {
-      lm then LmToComposition(lm, composition, cid, pid) "create composition";
+      lm then LmToComposition(lm, composition, cid, pid, prid, oid, eid, obsid) "create composition";
       lm -> entry.resource = composition "set composition as entry";
       } "map composition resource";
-    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', pid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesPatient') as patient then {
+    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', pid), create('Patient') as patient then {
     lm.Demographics as demographics -> demographics then DemographicsToPatient(demographics, patient, pid) "create patient";
     lm -> entry.resource = patient "set patient as entry";
     } "map patient resource";
+    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', prid), create('Practitioner') as practitioner then {
+    lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToPractitioner(reportingSource, practitioner, prid) "create practitioner";
+    lm -> entry.resource = practitioner "set practitioner as entry";
+    } "map practitioner resource" ;
+    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', oid), create('Organization') as organization then {
+    lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToOrganization(reportingSource, organization, oid) "create organization";
+    lm -> entry.resource = organization "set organization as entry";
+    } "map organization resource";
+    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', eid), create('Encounter') as encounter then {
+    lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToEncounter(reportingSource, encounter, eid) "create encounter";
+    lm -> entry.resource = encounter "set encounter as entry";
+    } "map encounter resource";
+    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', obsid), create('Observation') as observation then {
+    lm.Clinical as clinical -> clinical then ClinicalToObservations(clinical, observation, obsid) "create observation";
+    lm -> entry.resource = observation "set observation as entry";
+    } "map observation resource";
 } "set entries" ;
 }
 
 
-group LmToComposition(source lm : MeaslesLogicalModel, target composition : MeaslesCIFComposition, source cid, source pid) {
+group LmToComposition(source lm : MeaslesLogicalModel, target composition : MeaslesCIFComposition, source cid, source pid, source prid, source oid, source eid, source obsid) {
   cid -> composition.id = cid "set id";
+  lm -> composition.status = "final" "set status";
+  lm -> composition.title = "PAHO Measles Case Investigation Form" "set title";
+  lm -> create('Coding') as coding, coding.code = "55751-2", coding.system = "http://loinc.org", coding.display = "Public health Case report", create('CodeableConcept') as code, code.coding = coding,  composition.type = code "set type";
+  lm.ReportingSource as reportingSource -> reportingSource then {
+    reportingSource.DateReportedLocal as date -> composition.date = date "set date";
+  } "set date reported local";
   lm -> composition.subject as subject then {
     lm -> subject.reference= append('Patient/',pid) "set subject";
   } "do";
+  lm -> composition.author as practitioner then {
+    lm -> practitioner.reference = append('Practitioner/', prid) "set author practitioner";
+  } "do";
+  lm -> composition.author as institution then {
+    lm -> institution.reference = append('Organization/', oid) "set author institution";
+  } "do";
+  lm -> composition.encounter as encounter then {
+    lm -> encounter.reference = append ('Encounter/', eid) "set encounter";
+  } "do";
+  lm -> composition.section as clinical then {
+    lm -> clinical.title = "Clinical Data, Follow up and Treatment" "set clinical title";
+    //lm -> clinical.code ;
+    lm -> clinical.entry as entry then {
+      lm-> entry.reference =append ('Observation/', obsid) "set observation 1";
+  } "do";
+} "do";
 }
 
 
@@ -46,4 +87,35 @@ group DemographicsToPatient(source demographics:DemographicsLogicalModel , targe
  demographics.WorkAddress as workAddress -> patient.extension as ext then {
  workAddress -> ext.url = 'http://worldhealthorganization.github.io/smart-ot/StructureDefinition/WorkAddress', ext.value = workAddress "set work address value";
  } "set work address";
+}
+
+group ReportingSourceToPractitioner (source reportingSource: ReportingSourceLogicalModel, target practitioner: Practitioner, source prid) {
+prid -> practitioner.id = prid "set id";
+reportingSource.ReportedBy as name -> practitioner.name as humanName, humanName.text = name "set name";
+}
+
+group ReportingSourceToOrganization (source reportingSource: ReportingSourceLogicalModel, target organization: MeaslesOrganization, source oid) {
+oid -> organization.id = oid "set id";
+reportingSource.HealthServiceName as name -> organization.name = name "set name";
+reportingSource.HealthServiceTelephone as phone -> organization.contact as contactDetails, contactDetails.telecom = phone "set phone";
+reportingSource.PlaceOfReporting as location -> organization.contact as contactDetails, contactDetails.address = location "set address";
+}
+
+group ReportingSourceToEncounter (source reportingSource: ReportingSourceLogicalModel, target encounter: MeaslesEncounter, source eid) {
+eid -> encounter.id = eid "set id";
+reportingSource.DateReportedLocal as date -> encounter.period as period, period.start = date "set date";
+}
+
+group ClinicalToObservations (source clinical: ClinicalLogicalModel, target observation: Observation, source obsid) {
+ obsid -> observation.id = obsid "set obsid";
+ clinical.Fever as fever where code.exists(value = 'Yes') then {
+  fever -> observation.value = "yeahh" "set fever";
+ } "do x";
+ clinical.Fever as fever where code.exists(value = 'No') then {
+  fever -> observation.value = "naa" "set fever";
+ } "do y";
+ observation.status
+ observation.code
+ observation.subject
+ 
 }
