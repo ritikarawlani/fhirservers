@@ -4,8 +4,8 @@ services:
   fhir-server:
     #image: alphora/cqf-ruler:latest
     #image: costateixeira/hapi:test
-    #image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v3.3.0
-    image: costateixeira/lantern:latest
+    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v3.4.2
+    #image: costateixeira/lantern:latest
     restart: always
     container_name: ${server_name}
     ports:
