@@ -3,47 +3,47 @@ uses "http://worldhealthorganization.github.io/smart-ot/StructureDefinition/SOTM
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias MeaslesCIFBundle as target
 
 group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bundle : MeaslesCIFBundle) {
-  lm -> bundle.type = 'document' "set bundle type";
-  lm -> uuid() as bid, bundle.id = bid "set id";
+  lm -> bundle.type = 'document' "setbundletype";
+  lm -> uuid() as bid, bundle.id = bid "setid";
   lm -> uuid() as cid, uuid() as pid then { 
     lm -> bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', cid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition then {
-      lm then LmToComposition(lm, composition, cid, pid) "create composition";
-      lm -> entry.resource = composition "set composition as entry";
-      } "map composition resource";
+      lm then LmToComposition(lm, composition, cid, pid) "createcomposition";
+      lm -> entry.resource = composition "setcompositionAsEntry";
+      } "mapCompositionResource";
     lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', pid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesPatient') as patient then {
-    lm.Demographics as demographics -> demographics then DemographicsToPatient(demographics, patient, pid) "create patient";
-    lm -> entry.resource = patient "set patient as entry";
-    } "map patient resource";
-} "set entries" ;
+    lm.Demographics as demographics -> demographics then DemographicsToPatient(demographics, patient, pid) "createPatient";
+    lm -> entry.resource = patient "setPatientAsEntry";
+    } "mapPatientResource";
+} "setEntries" ;
 }
 
 
 group LmToComposition(source lm : MeaslesLogicalModel, target composition : MeaslesCIFComposition, source cid, source pid) {
-  cid -> composition.id = cid "set id";
+  cid -> composition.id = cid "setId2";
   lm -> composition.subject as subject then {
-    lm -> subject.reference= append('Patient/',pid) "set subject";
+    lm -> subject.reference= append('Patient/',pid) "setSubject2";
   } "do";
 }
 
 
 group DemographicsToPatient(source demographics:DemographicsLogicalModel , target patient: MeaslesPatient, source pid) {
- pid -> patient.id = pid "set id";
- demographics.Name as name -> patient.name = name "set name";
- demographics.DateOfBirth as dob -> patient.birthDate = dob "set date of birth";
- demographics.Sex as sex -> patient.gender = sex "set sex";
- demographics.CountryOfBirth as cob -> patient.CountryOfBirth = cob "set CountryOfBirth";
+ pid -> patient.id = pid "setId3";
+ demographics.Name as name -> patient.name = name "setName2";
+ demographics.DateOfBirth as dob -> patient.birthDate = dob "setDateOfBirth";
+ demographics.Sex as sex -> patient.gender = sex "setSex";
+ demographics.CountryOfBirth as cob -> patient.CountryOfBirth = cob "setCountryOfBirth";
  demographics.Landmark as landmark -> patient.extension as ext then {
-  landmark -> ext.url = 'http://worldhealthorganization.github.io/smart-ot/StructureDefinition/Landmark' , ext.value = landmark "set landmark value";
- } "set landmark";
+  landmark -> ext.url = 'http://worldhealthorganization.github.io/smart-ot/StructureDefinition/Landmark' , ext.value = landmark "setLandmarkValue";
+ } "setLandmark";
  demographics.Guardian as guardian -> patient.extension as ext then {
-  guardian -> ext.url = 'http://worldhealthorganization.github.io/smart-ot/StructureDefinition/Guardian' , ext.value = guardian "set guardian value";
- } "set guardian";
- demographics.Telephone as phone -> patient.telecom = phone "set telephone";
- demographics.PlaceOfResidence as address -> patient.address = address "set address";
+  guardian -> ext.url = 'http://worldhealthorganization.github.io/smart-ot/StructureDefinition/Guardian' , ext.value = guardian "setGuardianValue";
+ } "setGuardian";
+ demographics.Telephone as phone -> patient.telecom = phone "setTelephone";
+ demographics.PlaceOfResidence as address -> patient.address = address "setAddress";
  demographics.Occupation as occupation -> patient.extension as ext then {
-  occupation -> ext.url ='http://worldhealthorganization.github.io/smart-ot/StructureDefinition/Occupation', ext.value = occupation "set occupation value";
- } "set occupation";
+  occupation -> ext.url ='http://worldhealthorganization.github.io/smart-ot/StructureDefinition/Occupation', ext.value = occupation "setOccupationValue";
+ } "setOccupation";
  demographics.WorkAddress as workAddress -> patient.extension as ext then {
- workAddress -> ext.url = 'http://worldhealthorganization.github.io/smart-ot/StructureDefinition/WorkAddress', ext.value = workAddress "set work address value";
- } "set work address";
+ workAddress -> ext.url = 'http://worldhealthorganization.github.io/smart-ot/StructureDefinition/WorkAddress', ext.value = workAddress "setWorkAddressValue";
+ } "setWorkAddress";
 }

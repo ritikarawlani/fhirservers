@@ -200,15 +200,39 @@ document.addEventListener("DOMContentLoaded", function() {
                         url: serverBase+"/StructureMap?url=" + qrURL,
                         dataType: "json",
                         success: function(data) {
-                            smap = data.entry[0].resource;
-                            mLocation = data.entry[0].fullUrl;
-                            // Add the form to the page
-                            document.getElementById("mapLocation").innerHTML = 'StructureMap Location: <a  target="_blank" href=' + mLocation + '>' + mLocation + '</a>';
-                            //                              document.getElementById("mappingCode").innerHTML = $('<div/>').html(smap.text.div).text();
-                            myCodeMirror.setValue($('<div/>').html(smap.text.div).text())
-                            //                              myCodeMirror.setValue(smap.text.div)
-                            //                              myCodeMirror.setValue("NO MAP")
+                            let matchedResource = null;
+
+                            // Loop through each entry in the bundle to find the first match
+                            for(let i = 0; i < data.entry.length; i++) {
+                                if(data.entry[i].resource.url === qrURL) {
+                                    matchedResource = data.entry[i].resource;
+                                    break; // Exit the loop as we found our first match
+                                }
+                            }
+
+                            if(matchedResource) {
+                                let mLocation = matchedResource.fullUrl;
+                                document.getElementById("mapLocation").innerHTML = 'StructureMap Location: <a  target="_blank" href=' + mLocation + '>' + mLocation + '</a>';
+                                myCodeMirror.setValue($('<div/>').html(matchedResource.text.div).text());
+
+                                // Check for multiple matches and log a warning if found
+                                let additionalMatches = 0;
+                                for(let i = 1; i < data.entry.length; i++) {
+                                    if(data.entry[i].resource.url === qrURL) {
+                                        additionalMatches++;
+                                    }
+                                }
+
+                                if(additionalMatches > 0) {
+                                    console.warn(`Multiple StructureMaps found matching the provided qrURL. Only the first match was taken. ${additionalMatches} additional matches were ignored.`);
+                                }
+                            } else {
+                                // Handle the case where no matching resource was found
+                                console.warn("No matching StructureMap found for the provided qrURL");
+                            }
                         }
+
+
                     });
                 },
             });
@@ -328,7 +352,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
               $.ajax({
-                type: "POST",
+                type: "PUT",
                 url: serverBase+"/StructureMap",
                 contentType: 'text/fhir-mapping',
                 headers: {          

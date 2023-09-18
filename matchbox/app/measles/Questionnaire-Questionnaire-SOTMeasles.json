@@ -79,7 +79,7 @@
   }],
   "extension" : [{
     "url" : "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap",
-    "valueCanonical" : "http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesQuestionnaireToLogicalModel"
+    "valueCanonical" : "http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesQuestionnaireToResources"
   }],
   "url" : "http://worldhealthorganization.github.io/smart-ot/Questionnaire/Questionnaire-SOTMeasles",
   "version" : "0.2.1",
