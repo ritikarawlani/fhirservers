@@ -1,6 +1,8 @@
 map "http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesLogicalModelToResources" = "MeaslesLogicalModelToResources"
 uses "http://worldhealthorganization.github.io/smart-ot/StructureDefinition/SOTMeasles" alias MeaslesLogicalModel as source
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias MeaslesCIFBundle as target
+uses "http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition" alias MeaslesCIFComposition as target
+
 
 group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bundle : MeaslesCIFBundle) {
   lm -> bundle.type = 'document' "set bundle type";
@@ -8,11 +10,7 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
     reportingSource.DateReportedNational as date -> bundle.timestamp = date "set date";
   } "set timestamp";
   lm -> uuid() as bid, bundle.id = bid "set id";
-  lm -> uuid() as cid, uuid() as pid, uuid() as prid, uuid() as oid, uuid() as eid, uuid() as obsid  then { 
-    lm -> bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', cid), create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition then {
-      lm then LmToComposition(lm, composition, cid, pid, prid, oid, eid, obsid) "create composition";
-      lm -> entry.resource = composition "set composition as entry";
-      } "map composition resource";
+  lm -> uuid() as cid, uuid() as pid, uuid() as prid, uuid() as oid, uuid() as eid, create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition  then {  
     lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', pid), create('Patient') as patient then {
     lm.Demographics as demographics -> demographics then DemographicsToPatient(demographics, patient, pid) "create patient";
     lm -> entry.resource = patient "set patient as entry";
@@ -29,15 +27,47 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
     lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToEncounter(reportingSource, encounter, eid) "create encounter";
     lm -> entry.resource = encounter "set encounter as entry";
     } "map encounter resource";
-    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', obsid), create('Observation') as observation then {
-    lm.Clinical as clinical -> clinical then ClinicalToObservations(clinical, observation, obsid) "create observation";
-    lm -> entry.resource = observation "set observation as entry";
-    } "map observation resource";
-} "set entries" ;
+    lm.Clinical as clinical -> clinical then mapClinicalToObservations (clinical, bundle, composition, pid) "set clinical data";
+    lm -> composition.section as section then {
+      lm -> section.title = "labs" "set lab data";
+      lm -> section.code "set code";
+      lm.LaboratoryResults as labs -> labs then mapLabsToObservations (labs, bundle, section, pid) "set labs data";
+    } "set lab section";
+    lm -> bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', cid) then {
+    lm -> lm then LmToComposition(lm, composition, cid, pid, prid, oid, eid) "create composition";
+    lm -> entry.resource = composition "set composition";
+    } "map composition resource";
+  } "set entries" ;
 }
 
+group mapClinicalToObservations(source clinical : MeaslesClinical, target bundle: Bundle, target composition: MeaslesCIFComposition, source pid) {
+ clinical -> composition.section as section, section.title = "Clinical Data, Follow up and Treatment" then {
+ clinical ->  uuid() as obsid, bundle.entry as entry, entry.fullUrl = append('urn:uuid:', obsid), section.entry as sectionEntry, sectionEntry.reference =append('Observation/', obsid), create('Observation') as observation then {
+    clinical -> clinical then mapClinicalToObservationEntries(clinical, observation, obsid, pid) "create observation";
+    clinical -> entry.resource = observation "set observation as entry";
+ } "set data";
+ } "set";
+}
 
-group LmToComposition(source lm : MeaslesLogicalModel, target composition : MeaslesCIFComposition, source cid, source pid, source prid, source oid, source eid, source obsid) {
+group mapClinicalToObservationEntries(source clinical : MeaslesClinical, target observation: Observation, source obsid, source pid) {
+ obsid -> observation.id = obsid "set obsid";
+ clinical.Fever as fever -> observation.value = fever "set value";
+ clinical -> observation.status  = "registered" "set status";
+ clinical -> create('Coding') as coding, coding.code = "45701-0", coding.system = "https://loinc.org", coding.display = "Fever", create('CodeableConcept') as code, code.coding = coding,  observation.code = code "set code"; 
+ clinical -> observation.subject as subject then {
+ clinical -> subject.reference = append('Patient/',pid) "set subject";
+ } "set subject";
+}
+
+group mapLabsToObservations(source labs : MeaslesLabs, target bundle: Bundle, target section: Section, source pid) {
+ /*labs ->  uuid() as obsid, bundle.entry as entry, entry.fullUrl = append('urn:uuid:', obsid), section.entry as sectionEntry, sectionEntry.reference =append('Observation/', obsid), create('Observation') as observation then {
+    labs -> labs then ClinicalToObservationEntries(clinical, observation, obsid, pid) "create observation";
+    labs -> entry.resource = observation "set observation as entry";
+ }*/
+}  
+
+
+group LmToComposition(source lm : MeaslesLogicalModel, target composition : MeaslesCIFComposition, source cid, source pid, source prid, source oid, source eid) {
   cid -> composition.id = cid "set id";
   lm -> composition.status = "final" "set status";
   lm -> composition.title = "PAHO Measles Case Investigation Form" "set title";
@@ -47,23 +77,16 @@ group LmToComposition(source lm : MeaslesLogicalModel, target composition : Meas
   } "set date reported local";
   lm -> composition.subject as subject then {
     lm -> subject.reference= append('Patient/',pid) "set subject";
-  } "do";
+  } "set subject";
   lm -> composition.author as practitioner then {
     lm -> practitioner.reference = append('Practitioner/', prid) "set author practitioner";
-  } "do";
+  } "set author practitioner";
   lm -> composition.author as institution then {
     lm -> institution.reference = append('Organization/', oid) "set author institution";
-  } "do";
+  } "set author org";
   lm -> composition.encounter as encounter then {
     lm -> encounter.reference = append ('Encounter/', eid) "set encounter";
-  } "do";
-  lm -> composition.section as clinical then {
-    lm -> clinical.title = "Clinical Data, Follow up and Treatment" "set clinical title";
-    //lm -> clinical.code ;
-    lm -> clinical.entry as entry then {
-      lm-> entry.reference =append ('Observation/', obsid) "set observation 1";
-  } "do";
-} "do";
+  } "set encounter";
 }
 
 
@@ -106,16 +129,3 @@ eid -> encounter.id = eid "set id";
 reportingSource.DateReportedLocal as date -> encounter.period as period, period.start = date "set date";
 }
 
-group ClinicalToObservations (source clinical: ClinicalLogicalModel, target observation: Observation, source obsid) {
- obsid -> observation.id = obsid "set obsid";
- clinical.Fever as fever where code.exists(value = 'Yes') then {
-  fever -> observation.value = "yeahh" "set fever";
- } "do x";
- clinical.Fever as fever where code.exists(value = 'No') then {
-  fever -> observation.value = "naa" "set fever";
- } "do y";
- observation.status
- observation.code
- observation.subject
- 
-}
