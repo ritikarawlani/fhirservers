@@ -11,6 +11,10 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
   } "set timestamp";
   lm -> uuid() as bid, bundle.id = bid "set id";
   lm -> uuid() as cid, uuid() as pid, uuid() as prid, uuid() as oid, uuid() as eid, create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition  then {  
+    lm -> bundle.entry as entry first,  entry.fullUrl = append('urn:uuid:', cid) then {
+    lm -> lm then LmToComposition(lm, composition,  cid,  pid,  prid,  oid,  eid ) "set";
+    lm -> entry.resource = composition "set composition";
+    } "map composition resource";
     lm -> bundle.entry as entry last, entry.fullUrl = append('urn:uuid:', pid), create('Patient') as patient then {
     lm.Demographics as demographics -> demographics then DemographicsToPatient(demographics, patient, pid) "create patient";
     lm -> entry.resource = patient "set patient as entry";
@@ -33,10 +37,6 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
       lm -> section.code "set code";
       lm.LaboratoryResults as labs -> labs then mapLabsToObservations (labs, bundle, section, pid) "set labs data";
     } "set lab section";
-    lm -> bundle.entry as entry first,  entry.fullUrl = append('urn:uuid:', cid) then {
-    lm -> lm then LmToComposition(lm, composition,  cid,  pid,  prid,  oid,  eid ) "set";
-    lm -> entry.resource = composition "set composition";
-    } "map composition resource";
   } "set entries" ;
 }
 
