@@ -11,19 +11,19 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
   } "set timestamp";
   lm -> uuid() as bid, bundle.id = bid "set id";
   lm -> uuid() as cid, uuid() as pid, uuid() as prid, uuid() as oid, uuid() as eid, create('http://worldhealthorganization.github.io/smart-ot/StructureDefinition/MeaslesCIFComposition') as composition  then {  
-    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', pid), create('Patient') as patient then {
+    lm -> bundle.entry as entry last, entry.fullUrl = append('urn:uuid:', pid), create('Patient') as patient then {
     lm.Demographics as demographics -> demographics then DemographicsToPatient(demographics, patient, pid) "create patient";
     lm -> entry.resource = patient "set patient as entry";
     } "map patient resource";
-    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', prid), create('Practitioner') as practitioner then {
+    lm -> bundle.entry as entry last, entry.fullUrl = append('urn:uuid:', prid), create('Practitioner') as practitioner then {
     lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToPractitioner(reportingSource, practitioner, prid) "create practitioner";
     lm -> entry.resource = practitioner "set practitioner as entry";
     } "map practitioner resource" ;
-    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', oid), create('Organization') as organization then {
+    lm -> bundle.entry as entry last, entry.fullUrl = append('urn:uuid:', oid), create('Organization') as organization then {
     lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToOrganization(reportingSource, organization, oid) "create organization";
     lm -> entry.resource = organization "set organization as entry";
     } "map organization resource";
-    lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', eid), create('Encounter') as encounter then {
+    lm -> bundle.entry as entry last, entry.fullUrl = append('urn:uuid:', eid), create('Encounter') as encounter then {
     lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToEncounter(reportingSource, encounter, eid) "create encounter";
     lm -> entry.resource = encounter "set encounter as entry";
     } "map encounter resource";
@@ -33,8 +33,7 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
       lm -> section.code "set code";
       lm.LaboratoryResults as labs -> labs then mapLabsToObservations (labs, bundle, section, pid) "set labs data";
     } "set lab section";
-    lm -> bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', cid) then {
-    lm -> lm then LmToComposition(lm, composition, cid, pid, prid, oid, eid) "create composition";
+    lm -> bundle.entry as entry first,  entry.fullUrl = append('urn:uuid:', cid) then {
     lm -> entry.resource = composition "set composition";
     } "map composition resource";
   } "set entries" ;
@@ -42,7 +41,7 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
 
 group mapClinicalToObservations(source clinical : MeaslesClinical, target bundle: Bundle, target composition: MeaslesCIFComposition, source pid) {
  clinical -> composition.section as section, section.title = "Clinical Data, Follow up and Treatment" then {
- clinical ->  uuid() as obsid, bundle.entry as entry, entry.fullUrl = append('urn:uuid:', obsid), section.entry as sectionEntry, sectionEntry.reference =append('Observation/', obsid), create('Observation') as observation then {
+ clinical ->  uuid() as obsid, bundle.entry as entry last, entry.fullUrl = append('urn:uuid:', obsid), section.entry as sectionEntry, sectionEntry.reference =append('Observation/', obsid), create('Observation') as observation then {
     clinical -> clinical then mapClinicalToObservationEntries(clinical, observation, obsid, pid) "create observation";
     clinical -> entry.resource = observation "set observation as entry";
  } "set data";
@@ -51,14 +50,22 @@ group mapClinicalToObservations(source clinical : MeaslesClinical, target bundle
 
 group mapClinicalToObservationEntries(source clinical : MeaslesClinical, target observation: Observation, source obsid, source pid) {
  obsid -> observation.id = obsid "set obsid";
- clinical.Fever as fever -> observation.value = fever "set value";
- clinical -> observation.status  = "registered" "set status";
- clinical -> create('Coding') as coding, coding.code = "45701-0", coding.system = "https://loinc.org", coding.display = "Fever", create('CodeableConcept') as code, code.coding = coding,  observation.code = code "set code"; 
- clinical -> observation.subject as subject then {
- clinical -> subject.reference = append('Patient/',pid) "set subject";
- } "set subject";
+ clinical.Fever as fever -> create('Coding') as coding, coding.code = "45701-0", coding.system = "https://loinc.org", coding.display = "Fever" then { 
+  fever-> fever then createObservationResource(fever, coding, observation, pid) "set obs"; 
+ }"set obs";
+ clinical.Rash as rash -> create('Coding') as coding, coding.code = "45701-0", coding.system = "https://loinc.org", coding.display = "rash" then { 
+  rash-> rash then createObservationResource(rash, coding, observation, pid) "set obs"; 
+ }"set obs";
 }
 
+group createObservationResource(source src, source coding: Coding, target observation : Observation, source pid) {
+ src -> create('CodeableConcept') as code, code.coding = coding, observation.code = code "set code"; 
+ src -> observation.value = src "set value";
+ src -> observation.status  = "registered" "set status";
+ src -> observation.subject as subject then {
+ src -> subject.reference = append('Patient/',pid) "set subject";
+ } "set subject";
+}
 group mapLabsToObservations(source labs : MeaslesLabs, target bundle: Bundle, target section: Section, source pid) {
  /*labs ->  uuid() as obsid, bundle.entry as entry, entry.fullUrl = append('urn:uuid:', obsid), section.entry as sectionEntry, sectionEntry.reference =append('Observation/', obsid), create('Observation') as observation then {
     labs -> labs then ClinicalToObservationEntries(clinical, observation, obsid, pid) "create observation";
