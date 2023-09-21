@@ -34,6 +34,7 @@ group MeaslesLogicalModelToResources(source lm : MeaslesLogicalModel, target bun
       lm.LaboratoryResults as labs -> labs then mapLabsToObservations (labs, bundle, section, pid) "set labs data";
     } "set lab section";
     lm -> bundle.entry as entry first,  entry.fullUrl = append('urn:uuid:', cid) then {
+    lm -> lm then LmToComposition(lm, composition,  cid,  pid,  prid,  oid,  eid ) "set";
     lm -> entry.resource = composition "set composition";
     } "map composition resource";
   } "set entries" ;
