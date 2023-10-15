@@ -102,6 +102,11 @@
       "display": "Yes"
     },
     "FeverOnsetDate": "2023-09-04",
+    "TypeOfRash": {
+      "system": "http://worldhealthorganization.github.io/smart-ot/RashType",
+      "code": "Haemorrhagic",
+      "display": "Haemorrhagic"
+    },
     "HospitalName": "test",
     "DateOfAdmission": "2023-09-04",
     "HospitalRecordNumber": "2435",

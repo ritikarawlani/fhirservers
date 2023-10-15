@@ -244,6 +244,51 @@
               }
             ]
           },
+          {
+            "linkId": "vaccinationStatus",
+            "text": "Section III: Vaccination History",
+            "item": [
+              {
+                "linkId": "sourceOfInformation",
+                "text": "Source of vaccination Information †",
+                "answer": [
+                  {
+                    "valueCoding": {
+                      "system": "http://ritikarawlani.github.io/smart-outbreak-measles/SourceOfInformation",
+                      "code": "Vaccinationcard",
+                      "display": "Vaccination card"
+                    }
+                  }
+                ]
+              },
+              {
+                "linkId": "noOfDoses",
+                "text": "Number of doses**",
+                "answer": [
+                  {
+                    "valueCoding": {
+                      "system": "http://ritikarawlani.github.io/smart-outbreak-measles/NoOfDoses",
+                      "code": "2",
+                      "display": "Two dose"
+                    }
+                  }
+                ]
+              },
+              {
+                "linkId": "vaccineType",
+                "text": "Type of Vaccine",
+                "answer": [
+                  {
+                    "valueCoding": {
+                      "system": "http://ritikarawlani.github.io/smart-outbreak-measles/VaccineType",
+                      "code": "1",
+                      "display": "Measles"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
          {
           "linkId": "vaccinationStatus",
           "text": "Section III: Vaccination History",
@@ -292,60 +337,6 @@
                     "system": "http://ritikarawlani.github.io/smart-outbreak-measles/VaccineType",
                     "code": "2",
                     "display": "Rubella"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "linkId": "vaccinationStatus",
-          "text": "Section III: Vaccination History",
-          "item": [
-            {
-              "linkId": "lastDoseDate",
-              "text": "Date of last dose",
-              "answer": [
-                {
-                  "valueDate": "2023-09-25"
-                }
-              ]
-            },
-            {
-              "linkId": "sourceOfInformation",
-              "text": "Source of vaccination Information †",
-              "answer": [
-                {
-                  "valueCoding": {
-                    "system": "http://ritikarawlani.github.io/smart-outbreak-measles/SourceOfInformation",
-                    "code": "Vaccinationcard",
-                    "display": "Vaccination card"
-                  }
-                }
-              ]
-            },
-            {
-              "linkId": "noOfDoses",
-              "text": "Number of doses**",
-              "answer": [
-                {
-                  "valueCoding": {
-                    "system": "http://ritikarawlani.github.io/smart-outbreak-measles/NoOfDoses",
-                    "code": "2",
-                    "display": "Two dose"
-                  }
-                }
-              ]
-            },
-            {
-              "linkId": "vaccineType",
-              "text": "Type of Vaccine",
-              "answer": [
-                {
-                  "valueCoding": {
-                    "system": "http://ritikarawlani.github.io/smart-outbreak-measles/VaccineType",
-                    "code": "1",
-                    "display": "Measles"
                   }
                 }
               ]
@@ -415,6 +406,19 @@
                 "answer": [
                   {
                     "valueDate": "2023-09-04"
+                  }
+                ]
+              },
+              {
+                "linkId": "rashType",
+                "text": "Type of rash",
+                "answer": [
+                  {
+                    "valueCoding": {
+                      "system": "http://worldhealthorganization.github.io/smart-ot/RashType",
+                      "code": "Haemorrhagic",
+                      "display": "Haemorrhagic"
+                    }
                   }
                 ]
               },
@@ -1076,7 +1080,142 @@
             ]
           }
         ]
-      }
+      } ,
+        {
+          "linkId": "laboratoryResults",
+          "text": "Section V: Specimens & Laboratory Testing",
+          "item": [
+            {
+              "linkId": "specimenNumber",
+              "text": "Specimen number*",
+              "answer": [
+                {
+                  "valueCoding": {
+                    "system": "http://worldhealthorganization.github.io/smart-ot/SpecimenNumber",
+                    "code": "2",
+                    "display": "Second Sample"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "sampleType",
+              "text": "Type of specimen**",
+              "answer": [
+                {
+                  "valueCoding": {
+                    "system": "http://worldhealthorganization.github.io/smart-ot/SampleType",
+                    "code": "1",
+                    "display": "Serum"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "collectionDate",
+              "text": "Date specimen obtained",
+              "answer": [
+                {
+                  "valueDate": "2023-10-10"
+                }
+              ]
+            },
+            {
+              "linkId": "labName",
+              "text": "Laboratory Name",
+              "answer": [
+                {
+                  "valueString": "dr pathlabs"
+                }
+              ]
+            },
+            {
+              "linkId": "specimenSentDate",
+              "text": "Date specimen was sent to lab",
+              "answer": [
+                {
+                  "valueDate": "2023-10-10"
+                }
+              ]
+            },
+            {
+              "linkId": "specimenReceivedDate",
+              "text": "Date Received",
+              "answer": [
+                {
+                  "valueDate": "2023-10-10"
+                }
+              ]
+            },
+            {
+              "linkId": "sampleId",
+              "text": "# specimen ID in lab.",
+              "answer": [
+                {
+                  "valueString": "232456"
+                }
+              ]
+            },
+            {
+              "linkId": "testPerformed",
+              "text": "Type of test",
+              "answer": [
+                {
+                  "valueCoding": {
+                    "system": "http://worldhealthorganization.github.io/smart-ot/TestPerformed",
+                    "code": "1",
+                    "display": "IgM EIA/Indirect"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "antigen",
+              "text": "Antigen",
+              "answer": [
+                {
+                  "valueCoding": {
+                    "system": "http://worldhealthorganization.github.io/smart-ot/Antigen",
+                    "code": "1",
+                    "display": "Measles"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "result",
+              "text": "Result",
+              "answer": [
+                {
+                  "valueCoding": {
+                    "system": "http://worldhealthorganization.github.io/smart-ot/Result",
+                    "code": "0",
+                    "display": "Negative"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "resultDate",
+              "text": "Date of Results",
+              "answer": [
+                {
+                  "valueDate": "2023-10-24"
+                }
+              ]
+            },
+            {
+              "linkId": "specifyVirus",
+              "text": "If virus was detected, specify viral genotype: (Measles: A, B1, B2, B3, C1, C2, D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, E, F, G1, G2, G3, H1, H2. Rubella: 1a, 1B, 1C,\n1D, 1E, 1F, 1g, 2A, 2B, 2c)",
+              "answer": [
+                {
+                  "valueString": "dq"
+                }
+            ]
+          }
+        ]
+      } 
+          
       ]}],
     "questionnaire": "http://worldhealthorganization.github.io/smart-ot/Questionnaire/Questionnaire-SOTMeasles"
 }

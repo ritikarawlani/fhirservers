@@ -18,7 +18,7 @@ DELETE {{host}}/Questionnaire?_type=Questionnaire HTTP/1.1
 DELETE {{host}}/StructureMap?_type=StructureMap HTTP/1.1
 
 ###  DELETE MAPPING IF EXISTS
-DELETE {{host}}/StructureMap?url=http://worldhealthorganization.github.io/smart-otStructureMap/MeaslesQuestionnaireToLogicalModel HTTP/1.1
+DELETE {{host}}/StructureMap?url=http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesQuestionnaireToLogicalModel HTTP/1.1
 
 
 ## MANDATORY SETUP
@@ -27,14 +27,14 @@ POST {{host}}/StructureMap HTTP/1.1
 Accept: application/fhir+json;fhirVersion=4.0
 Content-Type: text/fhir-mapping
 
-< ./{{folder}}/MeaslesQuestionnaireToLogicalModel.map
+< ./{{folder}}/MeaslesQuestionnaireToLogicalModel.fml
 
 ### POST STRUCTUREMAP
 POST {{host}}/StructureMap HTTP/1.1
 Accept: application/fhir+json;fhirVersion=4.0
 Content-Type: text/fhir-mapping
 
-< ./{{folder}}/MeaslesLogicalModelToResources.map
+< ./{{folder}}/MeaslesLogicalModelToResources.fml
 
 
 ### POST STRUCTUREMAP
@@ -42,17 +42,17 @@ POST {{host}}/StructureMap HTTP/1.1
 Accept: application/fhir+json;fhirVersion=4.0
 Content-Type: text/fhir-mapping
 
-< ./{{folder}}/MeaslesQuestionnaireToResources.map
+< ./{{folder}}/MetaDataTypesHelper.fml
 
 ### POST STRUCTUREMAP
 POST {{host}}/StructureMap HTTP/1.1
 Accept: application/fhir+json;fhirVersion=4.0
 Content-Type: text/fhir-mapping
 
-< ./{{folder}}/MeaslesQuestionnaireToResourcesTest.map
+< ./{{folder}}/MeaslesQuestionnaireToResources.fml
 
 ### see if SM is there
-GET {{host}}/StructureMap?url=http://worldhealthorganization.github.io/smart-otStructureMap/MeaslesQuestionnaireToLogicalModel HTTP/1.1
+GET {{host}}/StructureMap?url=http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesQuestionnaireToLogicalModel HTTP/1.1
 
 
 
@@ -223,23 +223,12 @@ Content-Type: application/fhir+json;fhirVersion=4.0
 < ./{{folder}}/QuestionnaireResponse-response1.json
 
 
-
-### POST a response
-POST {{host}}/StructureMap/$transform?source=http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesQuestionnaireToResourcesTest
-Accept: application/fhir+json;fhirVersion=4.0
-Content-Type: application/fhir+json;fhirVersion=4.0
-
-< ./{{folder}}/QuestionnaireResponse-response1.json
-
 ### POST STRUCTUREMAP
 POST {{host}}/StructureMap HTTP/1.1
 Accept: application/fhir+json;fhirVersion=4.0
 Content-Type: text/fhir-mapping
 
-< ./{{folder}}/MeaslesLogicalModelToResources.map
-
-
-
+< ./{{folder}}/MeaslesLogicalModelToResources.fml
 
 
 
