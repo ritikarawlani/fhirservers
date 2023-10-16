@@ -30,9 +30,17 @@ group MeaslesLogicalModelToResources(source lm : SOTMeasles, target bundle : Bun
     lm -> entry.resource = organization "set organization as entry";
     } "map organization resource";
     lm -> bundle.entry as entry, entry.fullUrl = append('urn:uuid:', eid), create('Encounter') as encounter then {
-    lm.ReportingSource as reportingSource -> reportingSource then ReportingSourceToEncounter(reportingSource, encounter, eid) "create encounter";
+    lm.ReportingSource as reportingSource then {
+      reportingSource.DateOfConsultation as date then {
+        date -> create('Coding') as type, type.code = "AMB", type.system = "http://terminology.hl7.org/CodeSystem/v3-ActCode", type.display = "ambulatory" then createCompositionEncounterResource(date,pid, type, eid,  encounter) "create encounter";
+      } "set encounter";
+      reportingSource.DateOfHomeVisit as date then {
+        date -> create('Coding') as type, type.code = "HH", type.system = "http://terminology.hl7.org/CodeSystem/v3-ActCode", type.display = "home health" then createCompositionEncounterResource(date,pid, type, eid,  encounter) "create encounter";
+      } "set encounter";
+    } "set encounter"; 
     lm -> entry.resource = encounter "set encounter as entry";
     } "map encounter resource";
+   // lm -> lm then mapEncounters (lm, bundle, composition, pid) "set encounter";
     lm -> lm then mapClinicalToObservations (lm, bundle, composition, pid) "set clinical data";
     lm -> lm then mapLabsToDiagnosticReport (lm, bundle, composition, pid) "set labs data";
     lm -> lm then mapVaccinationStatusToImmunization (lm, bundle, composition, pid) "set immunization data";
@@ -176,8 +184,8 @@ group mapClinicalToObservations(source lm : SOTMeasles, target bundle: Bundle, t
           outcome -> outcome then createObservationResource(outcome, coding, observation, pid) "set obs"; 
         } "set obs";
       clinical.DateOfDeath as onsetDate -> observation.effective = onsetDate "set start date";
-      } "set outcome";    
-
+      } "set outcome";
+      clinical -> clinical then mapEncounters(clinical, bundle, section, pid) "set encounter";
     } "set clinical";
   } "set section";
 }
@@ -350,8 +358,28 @@ reportingSource.PlaceOfReporting as locationSource -> organization.contact as co
 
 }
 
-group ReportingSourceToEncounter (source reportingSource: ReportingSourceLogicalModel, target encounter: Encounter, source eid) {
-eid -> encounter.id = eid "set id";
-reportingSource.DateReportedLocal as date -> encounter.period as period, period.start = date "set date";
+group mapEncounters (source clinical : SOTMeaslesClinical, target bundle: Bundle, target section: Element, source pid) {
+clinical.HistoryOfHospitalization where code = 'Yes' then {
+  clinical.DateOfAdmission as date then {
+    date -> create('Coding') as type, type.code = "IMP", type.system = "http://terminology.hl7.org/CodeSystem/v3-ActCode", type.display = "inpatient encounter" then createEncounterResource(date, bundle, section, pid, type) "create";
+  } "d";
+} "dff";
 }
 
+group createEncounterResource (source date, target bundle : Bundle, target section : Element,  source pid, source type: Coding ) {
+  date -> uuid() as eid, bundle.entry as entry, entry.fullUrl = append('urn:uuid:', eid), section.entry as sectionEntry, sectionEntry.reference = append('Encounter/', eid), entry.resource = create('Encounter') as encounter then {
+   date -> encounter.id = eid "set id";
+   date -> encounter.status = "finished" "set status";
+   pid -> encounter.subject as subject, subject.reference = append('Patient/',pid) "set subject";
+   date -> encounter.period as period, period.start = date "set date";
+   type -> encounter.class = type "set type";
+  } "dssd";
+}
+
+group createCompositionEncounterResource (source date,  source pid, source type: Coding, source eid, target encounter : Encounter ) {
+   date -> encounter.id = eid "set id";
+   date -> encounter.status = "finished" "set status";
+   pid -> encounter.subject as subject, subject.reference = append('Patient/',pid) "set subject";
+   date -> encounter.period as period, period.start = date "set date";
+   type -> encounter.class = type "set type";
+}
