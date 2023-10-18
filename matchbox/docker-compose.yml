@@ -13,7 +13,7 @@ services:
     environment:
        - server.servlet.context-path=
        - hapi.fhir.allow_multiple_delete=true
-#       - hapi.fhir.reuse_cached_search_results_millis=1000
+       - hapi.fhir.reuse_cached_search_results_millis=1000
        - hapi.fhir.server_address=localhost:${server_port:-8080}:8080
        - hapi.fhir.reuse_cached_search_results_millis=10000
        - matchbox.fhir.context.onlyOneEngine=true
