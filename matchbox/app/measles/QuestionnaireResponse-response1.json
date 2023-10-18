@@ -247,21 +247,6 @@
             "text": "Section III: Vaccination History",
             "item": [
               {
-                "linkId": "lastDoseDate",
-                "text": "Date of last dose",
-                "answer": [
-                  {
-                    "valueDate": "2023-09-04"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "linkId": "vaccinationStatus",
-            "text": "Section III: Vaccination History",
-            "item": [
-              {
                 "linkId": "sourceOfInformation",
                 "text": "Source of vaccination Information †",
                 "answer": [
@@ -271,6 +256,15 @@
                       "code": "Vaccinationcard",
                       "display": "Vaccination card"
                     }
+                  }
+                ]
+              },
+              {
+                "linkId": "lastDoseDate",
+                "text": "Date of last dose",
+                "answer": [
+                  {
+                    "valueDate": "2013-09-04"
                   }
                 ]
               },
