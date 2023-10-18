@@ -16,6 +16,14 @@ group addressToAddress (source sourceAddress, target targetAddress: Address) {
     sourcePeriod -> sourcePeriod then periodToPeriod(sourcePeriod, targetPeriod) "Copy period";
   } "copy period";
 }
+group dateToDateTime(source src: Left, target tgt: Right) {
+  src as src -> (%src.year) as year, (%src.month) as month, (%src.day) as day, append(year,'-',month,'-',day) as d,  tgt.date = d "rule1";
+
+}
+/*
+group dateToInstant (source src: Left, target tgt: Right) {
+  src as yy -> append(yy,'T15:00:00') as dts, cast(dts,'instant') as dt, tgt.datetime = dt "rule2";
+} */
 
 group humanNameToHumanName (source sourceName, target targetName: HumanName) {
   sourceName.use as use -> targetName.use = use "Copy use";

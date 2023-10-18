@@ -18,7 +18,7 @@ DELETE {{host}}/Questionnaire?_type=Questionnaire HTTP/1.1
 DELETE {{host}}/StructureMap?_type=StructureMap HTTP/1.1
 
 ###  DELETE MAPPING IF EXISTS
-DELETE {{host}}/StructureMap?url=http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesQuestionnaireToLogicalModel HTTP/1.1
+DELETE {{host}}/StructureMap?url=http://worldhealthorganization.github.io/smart-ot/StructureMap/MeaslesLogicalModelToResources HTTP/1.1
 
 
 ## MANDATORY SETUP
@@ -190,6 +190,13 @@ Accept: application/fhir+json;fhirVersion=4.0
 Content-Type: application/fhir+json;fhirVersion=4.0
 
 < ./{{folder}}/StructureDefinition-WorkAddress.json
+
+###
+PUT {{host}}/StructureDefinition/SOTT1ExposureTravelHistory
+Accept: application/fhir+json;fhirVersion=4.0
+Content-Type: application/fhir+json;fhirVersion=4.0
+
+< ./{{folder}}/StructureDefinition-SOTT1ExposureTravelHistory.json
 
 ###
 POST {{host}}/QuestionnaireResponse/$extract

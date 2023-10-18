@@ -1,3 +1,4 @@
+
 {
   "resourceType": "SOTMeasles",
   "Demographics": {
@@ -5,6 +6,11 @@
       "family": "John Doe"
     },
     "DateOfBirth": "2014-08-07",
+    "Sex": {
+      "system": "http://hl7.org/fhir/administrative-gender",
+      "code": "male",
+      "display": "Male"
+    },
     "PlaceOfResidence": {
       "text": "Avenue"
     },
@@ -22,27 +28,47 @@
   },
   "ReportingSource": {
     "PlaceOfReporting": {
-      "city": "City",
-      "district": "Locality",
-      "state": "State",
-      "country": "Utopia"
+      "line": [
+        "Locality"
+      ]
     },
     "ReportedBy": "reporter",
     "HealthServiceName": "hospital",
     "HealthServiceTelephone": [
       {
         "value": "123-phone"
+      },
+      {
+        "value": "123-phone"
+      },
+      {
+        "value": "123-phone"
+      },
+      {
+        "value": "123-phone"
+      },
+      {
+        "value": "123-phone"
+      },
+      {
+        "value": "123-phone"
+      },
+      {
+        "value": "123-phone"
+      },
+      {
+        "value": "123-phone"
       }
     ],
-    "DateOfConsultation": "2023-08-11",
-    "DateOfHomeVisit": "2023-08-10",
-    "DateReportedLocal": "2023-08-09",
-    "DateReportedNational": "2023-08-08",
     "InitialDiagnosis": {
       "system": "http://worldhealthorganization.github.io/smart-ot/InitDiag",
       "code": "1",
       "display": "Measles"
-    }
+    },
+    "DateOfConsultation": "2023-08-11",
+    "DateOfHomeVisit": "2023-08-10",
+    "DateReportedLocal": "2023-08-09",
+    "DateReportedNational": "2023-08-08"
   },
   "Clinical": {
     "RashOnsetDate": "2023-09-04",
@@ -107,6 +133,12 @@
       "code": "Haemorrhagic",
       "display": "Haemorrhagic"
     },
+    "Temperature": {
+      "value": 32
+    },
+    "GestationWeeks": {
+      "value": 42
+    },
     "HospitalName": "test",
     "DateOfAdmission": "2023-09-04",
     "HospitalRecordNumber": "2435",
@@ -147,11 +179,62 @@
         "display": "First Sample"
       },
       "ViralGenotype": "B1"
+    },
+    {
+      "SpecimenCollectionDate": "2023-10-10",
+      "SpecimenSentDate": "2023-10-10",
+      "SpecimenRecdDate": "2023-10-10",
+      "LabName": "dr pathlabs",
+      "LabResultsDate": "2023-10-24",
+      "Results": {
+        "system": "http://worldhealthorganization.github.io/smart-ot/Result",
+        "code": "0",
+        "display": "Negative"
+      },
+      "SampleId": "232456",
+      "SampleType": {
+        "system": "http://worldhealthorganization.github.io/smart-ot/SampleType",
+        "code": "1",
+        "display": "Serum"
+      },
+      "TypeOfTest": {
+        "system": "http://worldhealthorganization.github.io/smart-ot/TestPerformed",
+        "code": "1",
+        "display": "IgM EIA/Indirect"
+      },
+      "Antigen": {
+        "system": "http://worldhealthorganization.github.io/smart-ot/Antigen",
+        "code": "1",
+        "display": "Measles"
+      },
+      "SpecimenNumber": {
+        "system": "http://worldhealthorganization.github.io/smart-ot/SpecimenNumber",
+        "code": "2",
+        "display": "Second Sample"
+      },
+      "ViralGenotype": "dq"
     }
   ],
   "VaccinationStatus": [
     {
       "LastDoseDate": "2023-09-04"
+    },
+    {
+      "VaccineType": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/VaccineType",
+        "code": "1",
+        "display": "Measles"
+      },
+      "NumberOfDoses": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/NoOfDoses",
+        "code": "2",
+        "display": "Two dose"
+      },
+      "Source": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/SourceOfInformation",
+        "code": "Vaccinationcard",
+        "display": "Vaccination card"
+      }
     },
     {
       "VaccineType": {
@@ -170,26 +253,58 @@
         "display": "Health Services"
       },
       "LastDoseDate": "2023-09-04"
-    },
-    {
-      "VaccineType": {
-        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/VaccineType",
-        "code": "1",
-        "display": "Measles"
-      },
-      "NumberOfDoses": {
-        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/NoOfDoses",
-        "code": "2",
-        "display": "Two dose"
-      },
-      "Source": {
-        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/SourceOfInformation",
-        "code": "Vaccinationcard",
-        "display": "Vaccination card"
-      },
-      "LastDoseDate": "2023-09-25"
     }
   ],
+  "ContactTracing": [
+    {
+      "caseSearchConducted": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/YesNoUnknown",
+        "code": "Yes",
+        "display": "Yes"
+      },
+      "pregnantContact": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/YesNoUnknown",
+        "code": "Yes",
+        "display": "Yes"
+      },
+      "pregnantContactNames": "Ritika Rawlani",
+      "localCasesPresent": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/LocalCasesPresent",
+        "code": "1",
+        "display": "Yes, with measles"
+      },
+      "travelledOutside": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/YesNoUnknown",
+        "code": "Yes",
+        "display": "Yes"
+      },
+      "infectionSetting": {
+        "system": "http://ritikarawlani.github.io/smart-outbreak-measles/InfectionSetting",
+        "code": "1",
+        "display": "Household contact"
+      }
+    }
+  ],
+  "EpiData": {
+    "ringVaccination": {
+      "system": "http://ritikarawlani.github.io/smart-outbreak-measles/YesNoUnknown",
+      "code": "Yes",
+      "display": "Yes"
+    },
+    "dateStarted": "2023-08-27",
+    "dateEnded": "2023-09-19",
+    "rapidCoverageMonitioring": {
+      "system": "http://ritikarawlani.github.io/smart-outbreak-measles/YesNoUnknown",
+      "code": "Yes",
+      "display": "Yes"
+    },
+    "contactTracingDone": {
+      "system": "http://ritikarawlani.github.io/smart-outbreak-measles/YesNoUnknown",
+      "code": "Yes",
+      "display": "Yes"
+    },
+    "lastFollowUp": "2023-09-26"
+  },
   "Classification": {
     "FinalClassification": {
       "system": "http://ritikarawlani.github.io/smart-outbreak-measles/FinalClassification",
